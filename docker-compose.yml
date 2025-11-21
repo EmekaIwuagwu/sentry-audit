@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: sentryaudit-db
+    environment:
+      POSTGRES_USER: sentryaudit
+      POSTGRES_PASSWORD: sentryaudit123
+      POSTGRES_DB: sentryaudit
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentryaudit"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sentryaudit-network
+
+  # Redis Cache & Queue
+  redis:
+    image: redis:7-alpine
+    container_name: sentryaudit-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis_data:/data
+    networks:
+      - sentryaudit-network
+
+  # Backend API
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sentryaudit-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://sentryaudit:sentryaudit123@db:5432/sentryaudit
+      - REDIS_URL=redis://redis:6379/0
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEBUG=false
+      - ENVIRONMENT=production
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:80,http://localhost
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - sentryaudit-network
+    restart: unless-stopped
+
+  # Frontend (React)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sentryaudit-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    depends_on:
+      - api
+    networks:
+      - sentryaudit-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: sentryaudit-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+      - frontend
+    networks:
+      - sentryaudit-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  sentryaudit-network:
+    driver: bridge

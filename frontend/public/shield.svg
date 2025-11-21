@@ -1,0 +1,50 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shield outer shape -->
+  <defs>
+    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B0000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DC143C;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Main shield shape -->
+  <path d="M128 20 L40 60 L40 120 C40 180 80 220 128 236 C176 220 216 180 216 120 L216 60 Z"
+        fill="url(#shieldGradient)"
+        stroke="#B22222"
+        stroke-width="4"
+        filter="url(#glow)"/>
+
+  <!-- Inner circuit pattern -->
+  <g opacity="0.8">
+    <!-- Central chip/lock icon -->
+    <rect x="108" y="90" width="40" height="40" rx="4" fill="#fff" opacity="0.9"/>
+    <circle cx="128" cy="110" r="8" fill="#8B0000"/>
+
+    <!-- Circuit lines -->
+    <line x1="128" y1="80" x2="128" y2="90" stroke="#fff" stroke-width="2"/>
+    <line x1="108" y1="110" x2="90" y2="110" stroke="#fff" stroke-width="2"/>
+    <line x1="148" y1="110" x2="166" y2="110" stroke="#fff" stroke-width="2"/>
+    <line x1="128" y1="130" x2="128" y2="150" stroke="#fff" stroke-width="2"/>
+
+    <!-- Circuit nodes -->
+    <circle cx="128" cy="80" r="3" fill="#fff"/>
+    <circle cx="90" cy="110" r="3" fill="#fff"/>
+    <circle cx="166" cy="110" r="3" fill="#fff"/>
+    <circle cx="128" cy="150" r="3" fill="#fff"/>
+
+    <!-- Lock keyhole -->
+    <circle cx="128" cy="115" r="4" fill="#8B0000"/>
+    <rect x="126" y="115" width="4" height="8" fill="#8B0000"/>
+  </g>
+
+  <!-- Subtle geometric accents -->
+  <polygon points="128,40 120,50 136,50" fill="#fff" opacity="0.3"/>
+  <polygon points="128,200 120,190 136,190" fill="#fff" opacity="0.3"/>
+</svg>
